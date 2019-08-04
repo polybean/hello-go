@@ -1,4 +1,4 @@
-module github.com/polybean/hello-golang
+module github.com/polybean/hello-go
 
 go 1.12
 

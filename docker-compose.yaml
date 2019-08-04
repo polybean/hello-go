@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: .
-    image: hello-golang
+    image: hello-go
     environment:
       DB: db
     ports:
