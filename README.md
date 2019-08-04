@@ -20,3 +20,11 @@ curl -i -X POST \
   -d '{"message":"Hola"}' \
   http://localhost:8080/greetings
 ```
+
+## Push image to [Docker Hub](https://hub.docker.com/)
+
+```sh
+docker login
+docker tag hello-go polybean/hello-go
+docker push polybean/hello-go
+```
