@@ -19,7 +19,7 @@ type greeting struct {
 }
 
 func index(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(writer, "Hello world!")
+	fmt.Fprintf(writer, "Hello, Go!")
 }
 
 func findAllGreetings(writer http.ResponseWriter, request *http.Request) {
@@ -32,7 +32,7 @@ func findAllGreetings(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if body == nil {
+	if len(messages) == 0 {
 		writer.WriteHeader(http.StatusNoContent)
 	} else {
 		writer.Header().Set(http.CanonicalHeaderKey("content-type"), "application/json")
@@ -90,7 +90,7 @@ func startServer() {
 }
 
 func connect2Mongo() {
-	envKey := "DB"
+	envKey := "DB_HOST"
 
 	db := os.Getenv(envKey)
 	if len(db) == 0 {
