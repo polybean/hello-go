@@ -4,7 +4,7 @@ services:
   app:
     # build:
     #   context: .
-    image: hello-go:2.0
+    image: hello-go:3.0
     environment:
       DB_HOST: db
     ports:
