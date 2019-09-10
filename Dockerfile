@@ -1,5 +1,3 @@
-# syntax = docker/dockerfile:experimental
-
 # reference: https://dev.to/plutov/docker-and-go-modules-3kkn
 FROM golang:1.12.7 AS builder
 WORKDIR /src
