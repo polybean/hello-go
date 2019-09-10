@@ -1,3 +1,26 @@
+# syntax = docker/dockerfile:experimental
+
+# Leave directive above to handle the corner case as listed below
+
+# Client: Docker Engine - Community
+#  Version:           19.03.2
+#  API version:       1.38 (downgraded from 1.40)
+#  Go version:        go1.12.8
+#  Git commit:        6a30dfca03
+#  Built:             Thu Aug 29 05:26:30 2019
+#  OS/Arch:           linux/amd64
+#  Experimental:      false
+
+# Server:
+#  Engine:
+#   Version:          18.06.1-ce
+#   API version:      1.38 (minimum version 1.12)
+#   Go version:       go1.10.3
+#   Git commit:       e68fc7a/18.06.1-ce
+#   Built:            Mon Jul  1 18:53:20 2019
+#   OS/Arch:          linux/amd64
+#   Experimental:     false
+
 # reference: https://dev.to/plutov/docker-and-go-modules-3kkn
 FROM golang:1.12.7 AS builder
 WORKDIR /src
