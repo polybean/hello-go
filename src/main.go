@@ -105,6 +105,11 @@ func connect2Mongo() {
 	coll = session.DB("hello").C("greetings")
 }
 
+// Add function is just for unit test demonstration
+func Add(x, y int) int {
+	return x + y
+}
+
 func main() {
 	connect2Mongo()
 	startServer()

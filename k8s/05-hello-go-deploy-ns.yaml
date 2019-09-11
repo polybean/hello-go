@@ -1,0 +1,176 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-go
+  namespace: prod
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /hello-go(/|$)(.*)
+            backend:
+              serviceName: hello-go-api
+              servicePort: 8080
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mongo
+  namespace: prod
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: mongo
+  namespace: prod
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mongo
+  namespace: prod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mongo
+subjects:
+  - kind: ServiceAccount
+    name: mongo
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hello-go-db
+  namespace: prod
+spec:
+  serviceName: hello-go-db
+  replicas: 3
+  selector:
+    matchLabels:
+      service: hello-go-db
+  template:
+    metadata:
+      labels:
+        service: hello-go-db
+    spec:
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: mongo
+      containers:
+        - name: db
+          image: mongo:4.2.0
+          command:
+            - mongod
+            - "--replSet"
+            - rs0
+            - --bind_ip_all
+          ports:
+            - containerPort: 27017
+          resources:
+            limits:
+              memory: 100Mi
+              cpu: 0.1
+            requests:
+              memory: 50Mi
+              cpu: 0.01
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+        - name: db-sidecar
+          image: cvallance/mongo-k8s-sidecar
+          env:
+            - name: MONGO_SIDECAR_POD_LABELS
+              value: "service=hello-go-db"
+            - name: KUBE_NAMESPACE
+              value: prod
+            - name: KUBERNETES_MONGO_SERVICE_NAME
+              value: hello-go-db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-go-db
+  namespace: prod
+spec:
+  ports:
+    - port: 27017
+  clusterIP: None
+  selector:
+    service: hello-go-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-go-api
+  namespace: prod
+  labels:
+    service: hello-go-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      service: hello-go-api
+  minReadySeconds: 1
+  progressDeadlineSeconds: 60
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        service: hello-go-api
+    spec:
+      containers:
+        - name: api
+          image: polybean/hello-go
+          resources:
+            limits:
+              # memory: 10Mi
+              memory: 15Mi
+              cpu: 0.1
+            requests:
+              memory: 5Mi
+              cpu: 0.01
+          env:
+            - name: DB_HOST
+              value: hello-go-db
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-go-api
+  namespace: prod
+spec:
+  ports:
+    - port: 8080
+  selector:
+    service: hello-go-api
