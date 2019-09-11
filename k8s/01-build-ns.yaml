@@ -22,6 +22,29 @@ subjects:
   - kind: ServiceAccount
     name: build
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: svc-reader
+rules:
+  - resources: ["services"]
+    verbs: ["get", "list"]
+    apiGroups: [""]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: svc-reader
+  namespace: kube-ingress
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: svc-reader
+subjects:
+  - kind: ServiceAccount
+    name: build
+    namespace: build
+---
 apiVersion: v1
 kind: LimitRange
 metadata:
