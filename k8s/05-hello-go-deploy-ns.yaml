@@ -142,7 +142,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: polybean/hello-go
+          image: polybean/hello-go:latest
           resources:
             limits:
               # memory: 10Mi

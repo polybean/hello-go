@@ -15,8 +15,8 @@ spec:
         - name: docker-socket
           mountPath: /var/run/docker.sock
       workingDir: /workspace
-    - name: kink
-      image: polybean/kink
+    - name: kubectl
+      image: polybean/kubectl
       command: ["sleep"]
       args: ["100000"]
       volumeMounts:
