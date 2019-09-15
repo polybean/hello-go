@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "helm.name" . }}-db
+  labels:
+    service: {{ template "helm.name" . }}-db
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  serviceName: {{ template "helm.name" . }}-db
+  replicas: {{ .Values.replica.db }}
+  selector:
+    matchLabels:
+      service: {{ template "helm.name" . }}-db
+  template:
+    metadata:
+      labels:
+        service: {{ template "helm.name" . }}-db
+    spec:
+      {{- if .Values.rbac.enabled }}
+      serviceAccountName: {{ template "helm.name" . }}-db
+      {{- end }}
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: db
+        image: "mongo:{{ .Values.image.dbTag }}"
+        command:
+          - mongod
+          - "--replSet"
+          - rs0
+          - --bind_ip_all
+        ports:
+          - containerPort: 27017
+        resources:
+{{ toYaml .Values.dbResources | indent 10 }}
+        volumeMounts:
+        - name: {{ template "helm.name" . }}-db
+          mountPath: /data/db
+      - name: db-sidecar
+        image: cvallance/mongo-k8s-sidecar
+        env:
+        - name: MONGO_SIDECAR_POD_LABELS
+          value: service={{ template "helm.name" . }}-db
+        - name: KUBE_NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: KUBERNETES_MONGO_SERVICE_NAME
+          value: {{ template "helm.name" . }}-db
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ template "helm.name" . }}-db
+      labels:
+        service: {{ template "helm.name" . }}-db
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    spec:
+      accessModes:
+      - {{ .Values.dbPersistence.accessMode }}
+      resources:
+        requests:
+          storage: {{ .Values.dbPersistence.size }}
+      {{- if .Values.dbPersistence.storageClass }}
+      {{- if eq "-" .Values.dbPersistence.storageClass }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.dbPersistence.storageClass }}"
+      {{- end }}
+      {{- end }}

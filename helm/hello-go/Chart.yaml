@@ -1,0 +1,9 @@
+apiVersion: v1
+description: A Helm chart for MongoDB backed service using Go
+name: hello-go
+version: 0.0.1
+sources:
+  - https://github.com/polybean/hello-go
+maintainers:
+  - name: polybean
+    email: polybean@gmail.com
