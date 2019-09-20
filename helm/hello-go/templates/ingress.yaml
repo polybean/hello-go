@@ -11,14 +11,12 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
     ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
-  - http:
+  - host: {{ .Values.ingress.host }}
+    http:
       paths:
-      - path: /hello-go(/|$)(.*)
-        backend:
+      - backend:
           serviceName: {{ $serviceName }}-api
           servicePort: 8080
-    host: {{ .Values.ingress.host }}
 {{- end -}}

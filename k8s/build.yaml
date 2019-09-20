@@ -12,7 +12,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /beta/hello-go(/|$)(.*)
+          - path: /beta(/|$)(.*)
             backend:
               serviceName: hello-go-api
               servicePort: 8080

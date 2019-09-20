@@ -6,7 +6,7 @@ image:
   dbTag: 4.2.0
 ingress:
   enabled: true
-  host: polybean.io
+  host: hello-go.polybean.io
 service:
   # Change to NodePort if ingress.enable=false
   type: ClusterIP
