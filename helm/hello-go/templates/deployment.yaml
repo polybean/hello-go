@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: hello-go-api
-        image: "polybean/hello-go:{{ .Values.image.appTag }}"
+        image: "polybean/hello-go:{{ .Values.image.tag }}"
         env:
         - name: DB_HOST
           value: {{ template "helm.name" . }}-db

@@ -2,7 +2,7 @@ replica:
   app: 3
   db: 3
 image:
-  appTag: latest
+  tag: latest
   dbTag: 4.2.0
 ingress:
   enabled: true
