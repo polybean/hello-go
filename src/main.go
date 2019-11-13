@@ -19,7 +19,7 @@ type greeting struct {
 }
 
 func index(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(writer, "Hello, Go!")
+	fmt.Fprintf(writer, "Hello, CDP!")
 }
 
 func findAllGreetings(writer http.ResponseWriter, request *http.Request) {
