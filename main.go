@@ -18,8 +18,8 @@ type greeting struct {
 	Message string        `bson:"message" json:"message"`
 }
 
-func index(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(writer, "Hello, CDP!")
+func hello(writer http.ResponseWriter, request *http.Request) {
+	fmt.Fprintf(writer, "Hello, Go!")
 }
 
 func findAllGreetings(writer http.ResponseWriter, request *http.Request) {
@@ -83,8 +83,10 @@ func greetings(writer http.ResponseWriter, request *http.Request) {
 
 func startServer() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", index)
+
 	mux.HandleFunc("/greetings", greetings)
+	mux.HandleFunc("/hello", hello)
+
 	http.ListenAndServe(":8080", mux)
 	log.Println("Server stated")
 }

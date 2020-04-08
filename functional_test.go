@@ -30,7 +30,7 @@ func TestFunctionalTestSuite(t *testing.T) {
 }
 
 func (s FunctionalTestSuite) Test_Index_ReturnsStatus200() {
-	address := fmt.Sprintf("http://%s%s/", s.hostIP, s.servicePath)
+	address := fmt.Sprintf("http://%s%s/hello", s.hostIP, s.servicePath)
 	log.Printf("Sending a request to %s\n", address)
 	resp, err := http.Get(address)
 

@@ -24,10 +24,10 @@
 # reference: https://dev.to/plutov/docker-and-go-modules-3kkn
 FROM golang:1.12.7 AS builder
 WORKDIR /src
-COPY ./src/go.mod .
-COPY ./src/go.sum .
+COPY ./go.mod .
+COPY ./go.sum .
 RUN go mod download
-ADD ./src/ /src
+ADD ./ /src
 RUN go build -v -o hello-server
 
 FROM alpine:3.4

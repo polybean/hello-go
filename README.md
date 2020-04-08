@@ -13,7 +13,7 @@ docker-compose up -d
 ## Testing using cURL
 
 ```sh
-curl -i http://localhost:8080
+curl -i http://localhost:8080/hello
 curl -i http://localhost:8080/greetings
 
 curl -i -X POST \
@@ -26,6 +26,5 @@ curl -i -X POST \
 
 ```sh
 docker login
-docker tag hello-go polybean/hello-go
 docker push polybean/hello-go
 ```
