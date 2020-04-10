@@ -156,12 +156,12 @@ spec:
               value: hello-go-db
           readinessProbe:
             httpGet:
-              path: /
+              path: /hello
               port: 8080
             periodSeconds: 1
           livenessProbe:
             httpGet:
-              path: /
+              path: /hello
               port: 8080
 ---
 apiVersion: v1
