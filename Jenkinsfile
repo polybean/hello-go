@@ -14,18 +14,18 @@ kind: Pod
 spec:
   containers:
   - name: helm
-    image: vfarcic/helm:2.9.1
+    image: polybean/helm3
     command: ["cat"]
     tty: true
     volumeMounts:
     - name: build-config
       mountPath: /etc/config
   - name: kubectl
-    image: vfarcic/kubectl
+    image: polybean/kubectl
     command: ["cat"]
     tty: true
   - name: golang
-    image: golang:1.12
+    image: golang:1.13
     command: ["cat"]
     tty: true
   volumes:
@@ -55,7 +55,7 @@ spec:
           k8sRolloutBeta(props.project)
         }
         container("golang") {
-          k8sFuncTestGolang(props.project, props.domain, "src", true)
+          k8sFuncTestGolang(props.project, props.domain, ".", true)
         }
       } catch(e) {
           error "Failed functional tests"
@@ -83,7 +83,7 @@ spec:
             k8sRollout(props.project)
           }
           container("golang") {
-            k8sProdTestGolang("${props.project}.${props.domain}", "src", true)
+            k8sProdTestGolang("${props.project}.${props.domain}", ".", true)
           }
         } catch(e) {
           container("helm") {
