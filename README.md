@@ -14,6 +14,7 @@ docker-compose up -d
 
 ```sh
 curl -i http://localhost:8080/hello
+curl -i http://localhost:8080/version
 curl -i http://localhost:8080/greetings
 
 curl -i -X POST \
@@ -27,4 +28,13 @@ curl -i -X POST \
 ```sh
 docker login
 docker push polybean/hello-go
+
+docker tag polybean/hello-go polybean/hello-go:1.0
+docker push polybean/hello-go:1.0
+```
+
+## Clean up
+
+```sh
+docker-compose down
 ```

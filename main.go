@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -19,7 +20,7 @@ type greeting struct {
 }
 
 func hello(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(writer, "Hello, Go!")
+	fmt.Fprintf(writer, "Hello, Go!\n")
 }
 
 func findAllGreetings(writer http.ResponseWriter, request *http.Request) {
@@ -81,11 +82,22 @@ func greetings(writer http.ResponseWriter, request *http.Request) {
 	writer.WriteHeader(http.StatusNotFound)
 }
 
+func version(writer http.ResponseWriter, request *http.Request) {
+	log.Printf("%s request to %s\n", request.Method, request.RequestURI)
+	release := request.Header.Get("release")
+	if release == "" {
+		release = "unknown"
+	}
+	msg := fmt.Sprintf("Version: %s; Release: %s\n", os.Getenv("VERSION"), release)
+	io.WriteString(writer, msg)
+}
+
 func startServer() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/greetings", greetings)
 	mux.HandleFunc("/hello", hello)
+	mux.HandleFunc("/version", version)
 
 	http.ListenAndServe(":8080", mux)
 	log.Println("Server stated")
@@ -113,6 +125,7 @@ func Add(x, y int) int {
 }
 
 func main() {
+	log.Printf("Starting the application\n")
 	connect2Mongo()
 	startServer()
 }

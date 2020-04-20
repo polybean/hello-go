@@ -22,7 +22,7 @@
 #   Experimental:     false
 
 # reference: https://dev.to/plutov/docker-and-go-modules-3kkn
-FROM golang:1.12.7 AS builder
+FROM golang:1.14 AS builder
 WORKDIR /src
 COPY ./go.mod .
 COPY ./go.sum .
@@ -30,7 +30,7 @@ RUN go mod download
 ADD ./ /src
 RUN go build -v -o hello-server
 
-FROM alpine:3.4
+FROM alpine:3.11
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 EXPOSE 8080
 ENV DB_HOST db
