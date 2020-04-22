@@ -50,7 +50,7 @@ func hello(writer http.ResponseWriter, request *http.Request) {
 		delayNum, _ := strconv.Atoi(delay)
 		time.Sleep(time.Duration(delayNum) * time.Millisecond)
 	}
-	io.WriteString(writer, "Hello, Go!\n")
+	io.WriteString(writer, "Hello, Go v4.0!\n")
 }
 
 func findAllGreetings(writer http.ResponseWriter, request *http.Request) {
