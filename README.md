@@ -27,10 +27,7 @@ curl -i -X POST \
 
 ```sh
 docker login
-docker push polybean/hello-go
-
-docker tag polybean/hello-go polybean/hello-go:1.0
-docker push polybean/hello-go:1.0
+docker push polybean/hello-go:3.0
 ```
 
 ## Clean up
