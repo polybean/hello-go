@@ -5,22 +5,52 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
+var serviceName = "hello-go"
 var coll *mgo.Collection
+var histogram = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+	Subsystem: "http_server",
+	Name:      "resp_time",
+	Help:      "Request response time",
+}, []string{
+	"service",
+	"code",
+	"method",
+	"path",
+})
 
 type greeting struct {
 	ID      bson.ObjectId `bson:"_id,omitempty" json:"id"`
 	Message string        `bson:"message" json:"message"`
 }
 
+func init() {
+	prometheus.MustRegister(histogram)
+}
+
 func hello(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(writer, "Hello, Go!\n")
+	start := time.Now()
+	defer func() { recordMetrics(start, request, http.StatusOK) }()
+
+	log.Printf("%s request to %s\n", request.Method, request.RequestURI)
+	delay := request.URL.Query().Get("delay")
+
+	if len(delay) > 0 {
+		delayNum, _ := strconv.Atoi(delay)
+		time.Sleep(time.Duration(delayNum) * time.Millisecond)
+	}
+	io.WriteString(writer, "Hello, Go!")
 }
 
 func findAllGreetings(writer http.ResponseWriter, request *http.Request) {
@@ -92,12 +122,38 @@ func version(writer http.ResponseWriter, request *http.Request) {
 	io.WriteString(writer, msg)
 }
 
+func randomError(writer http.ResponseWriter, request *http.Request) {
+	code := http.StatusOK
+	start := time.Now()
+	defer func() { recordMetrics(start, request, code) }()
+
+	log.Printf("%s request to %s\n", request.Method, request.RequestURI)
+	rand.Seed(time.Now().UnixNano())
+	n := rand.Intn(5)
+	msg := "Everything is still OK"
+	version := os.Getenv("VERSION")
+	if len(version) > 0 {
+		msg = fmt.Sprintf("%s with version %s", msg, version)
+	}
+	msg = fmt.Sprintf("%s\n", msg)
+	if n == 0 {
+		code = http.StatusInternalServerError
+		msg = "ERROR: Something, somewhere, went wrong!\n"
+		log.Printf(msg)
+	}
+	writer.WriteHeader(code)
+	io.WriteString(writer, msg)
+}
+
 func startServer() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/greetings", greetings)
 	mux.HandleFunc("/hello", hello)
 	mux.HandleFunc("/version", version)
+	mux.HandleFunc("/random-error", randomError)
+	mux.Handle("/metrics", promhttp.Handler())
+	mux.HandleFunc("/", version)
 
 	http.ListenAndServe(":8080", mux)
 	log.Println("Server stated")
@@ -126,6 +182,21 @@ func Add(x, y int) int {
 
 func main() {
 	log.Printf("Starting the application\n")
+	if len(os.Getenv("SERVICE_NAME")) > 0 {
+		serviceName = os.Getenv("SERVICE_NAME")
+	}
 	connect2Mongo()
 	startServer()
+}
+
+func recordMetrics(start time.Time, req *http.Request, code int) {
+	duration := time.Since(start)
+	histogram.With(
+		prometheus.Labels{
+			"service": serviceName,
+			"code":    fmt.Sprintf("%d", code),
+			"method":  req.Method,
+			"path":    req.URL.Path,
+		},
+	).Observe(duration.Seconds())
 }
